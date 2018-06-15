@@ -73,8 +73,8 @@
                 </button>
                 <ul id="format" class="dropdown-menu" aria-labelledby="triggerId">
                     <a name="" id="csv_format" class="btn btn-primary dropdown-item" href="#" role="button">csv</a>
-                    <a name="" id="csv_format" class="btn btn-primary dropdown-item" href="#" role="button">excel <span class="badge badge-danger">coming</span></a>
-                    <a name="" id="csv_format" class="btn btn-primary dropdown-item" href="#" role="button">pdf <span class="badge badge-danger">coming</span></a>
+                    <a name="" id="excel_format" class="btn btn-primary dropdown-item" href="#" role="button">excel</a>
+                    <a name="" id="pdf_format" class="btn btn-primary dropdown-item" href="#" role="button">pdf <span class="badge badge-danger">coming</span></a>
                 </ul>
           </div>
       </div>
@@ -105,10 +105,31 @@
                 var output = "";
                 for (const i in jsonData) {
 
-                    // display data 
+                    // display data
                     output += "<tbody><tr><td scope='row'>"+ jsonData[i].name +"</td><td>"+ jsonData[i].mail+"</td></tr></tbody>";
                 }
                 $("#tbl_data").append(output);
+
+                //conditions to download as excel file
+                
+                var wb    = XLSX.utils.table_to_book( document.getElementById('tbl_data'), {sheet: "sheet js"} );
+                var wbout = XLSX.write( wb, {
+                    bookType : 'xlsx',
+                    bookSST  : true,
+                    type     : 'binary'
+                } );
+                function s2bb(s) {
+                var buf = new ArrayBuffer(s.length); //convert s to arrayBuffer
+                var view = new Uint8Array(buf);  //create uint8array as viewer
+                for (var i=0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xFF; //convert to octet
+                return buf;
+                }
+
+
+                $("#excel_format").click(function () {
+                    saveAs(new Blob([s2bb(wbout)],{type:"application/octet-stream"}), 'testing.xlsx');
+                });
+
             }
          }
       xhr.send();
@@ -128,15 +149,15 @@
           var wsJson  = XLSX.utils.json_to_sheet( jsonPar );  //for json
             var csv = XLSX.utils.sheet_to_csv ( wsJson );
 
-            function s2ab(s) { 
+            function s2ab(s) {
             var buf = new ArrayBuffer(s.length); //convert s to arrayBuffer
             var view = new Uint8Array(buf);  //create uint8array as viewer
             for (var i=0; i<s.length; i++) view[i] = s.charCodeAt(i) & 0xFF; //convert to octet
-            return buf;    
+            return buf;
         }
 
 
-        $("#csv_format").click(function () { 
+        $("#csv_format").click(function () {
             saveAs(new Blob([s2ab(csv)],{type:"application/octet-stream"}), 'testing.csv');
         });  //for json format & csv type
 
